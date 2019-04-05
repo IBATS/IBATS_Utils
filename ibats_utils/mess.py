@@ -28,7 +28,11 @@ STR_FORMAT_DATETIME = '%Y-%m-%d %H:%M:%S'
 STR_FORMAT_DATETIME2 = '%Y-%m-%d %H:%M:%S.%f'
 STR_FORMAT_TIME = '%H:%M:%S'
 PATTERN_DATE_FORMAT_RESTRICT = re.compile(r"\d{4}(\D)*\d{2}(\D)*\d{2}")
-PATTERN_DATE_FORMAT = re.compile(r"\d{4}(\D)*\d{1,2}(\D)*\d{1,2}")
+PATTERN_DATE_FORMAT = re.compile(r"\d{4}(\D)+\d{1,2}(\D)+\d{1,2}")
+PATTERN_DATETIME_F_FORMAT_RESTRICT = re.compile(r"\d{4}(\D)*\d{2}(\D)*\d{2} \d{2}(\D)*\d{2}(\D)*\d{2}(\D)+\d{3,6}")
+PATTERN_DATETIME_F_FORMAT = re.compile(r"\d{4}(\D)+\d{1,2}(\D)+\d{1,2} \d{1,2}(\D)+\d{1,2}(\D)+\d{1,2}(\D)+\d{1,6}")
+PATTERN_DATETIME_FORMAT_RESTRICT = re.compile(r"\d{4}(\D)*\d{2}(\D)*\d{2} \d{2}(\D)*\d{2}(\D)*\d{2}")
+PATTERN_DATETIME_FORMAT = re.compile(r"\d{4}(\D)*\d{1,2}(\D)*\d{1,2} \d{1,2}(\D)*\d{1,2}(\D)*\d{1,2}")
 
 
 def active_coroutine(func):
@@ -307,6 +311,33 @@ def pattern_data_format(data_str):
     return date_str_format
 
 
+def pattern_datatime_format(data_str):
+    """
+    识别日期格式（例如：2017-12-23 12:31:56），并将其翻译成 %Y-%m-%d %H:%M:%S 类似的格式
+    识别日期格式（例如：2017-12-23 12:31:56.123），并将其翻译成 %Y-%m-%d %H:%M:%S.%f 类似的格式
+    :param data_str:
+    :return:
+    """
+    # 带 %f
+    date_str_format = PATTERN_DATETIME_F_FORMAT_RESTRICT.sub(r'%Y\1%m\2%d %H\3%M\4%S\5%f', data_str)
+    if date_str_format != data_str:
+        return date_str_format
+
+    date_str_format = PATTERN_DATETIME_F_FORMAT.sub(r'%Y\1%m\2%d %H\3%M\4%S\5%f', data_str)
+    if date_str_format != data_str:
+        return date_str_format
+
+    # 不带 %f
+    date_str_format = PATTERN_DATETIME_FORMAT_RESTRICT.sub(r'%Y\1%m\2%d %H\3%M\4%S', data_str)
+    if date_str_format != data_str:
+        return date_str_format
+    date_str_format = PATTERN_DATETIME_FORMAT.sub(r'%Y\1%m\2%d %H\3%M\4%S', data_str)
+    if date_str_format != data_str:
+        return date_str_format
+
+    return date_str_format
+
+
 def try_2_date(something):
     """
     兼容各种格式尝试将 未知对象转换为 date 类型，相对比 str_2_date 消耗资源，支持更多的类型检查，字符串格式匹配
@@ -325,6 +356,31 @@ def try_2_date(something):
             date_ret = datetime.strptime(something, date_str_format).date()
         elif type(something) in (pd.Timestamp, datetime):
             date_ret = something.date()
+        else:
+            date_ret = something
+    return date_ret
+
+
+def try_2_datetime(something):
+    """
+    兼容各种格式尝试将 未知对象转换为 date 类型，相对比 str_2_date 消耗资源，支持更多的类型检查，字符串格式匹配
+    :param something:
+    :return:
+    """
+    if something is None:
+        date_ret = something
+    else:
+        something_type = type(something)
+        if something_type in (int, np.int64, np.int32, np.int16, np.int8):
+            something = str(something)
+            something_type = type(something)
+        if type(something) == str:
+            date_str_format = pattern_datatime_format(something)
+            date_ret = datetime.strptime(something, date_str_format).date()
+        elif isinstance(something, datetime):
+            date_ret = something
+        elif isinstance(something, pd.Timestamp):
+            date_ret = something.to_pydatetime()
         else:
             date_ret = something
     return date_ret
