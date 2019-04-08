@@ -19,7 +19,6 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import Insert
 from ibats_utils.mess import date_2_str
 import logging
-from sqlalchemy import create_engine
 
 logger = logging.getLogger()
 
@@ -222,7 +221,9 @@ def bunch_insert_on_duplicate_update(df: pd.DataFrame, table_name, engine, dtype
                 #     CHANGE COLUMN `ths_code` `ths_code` VARCHAR(20) NOT NULL FIRST,
                 #     CHANGE COLUMN `time` `time` DATE NOT NULL AFTER `ths_code`,
                 #     ADD PRIMARY KEY (`ths_code`, `time`)""".format(table_name=table_name)
-                chg_pk_str = f"ALTER TABLE {table_name}\n" + "\n".join(col_name_sql_str_list)
+                primary_keys_str = "`" + "`, `".join(primary_keys) + "`"
+                add_primary_key_str = f",\nADD PRIMARY KEY ({primary_keys_str})"
+                chg_pk_str = f"ALTER TABLE {table_name}\n" + "\n".join(col_name_sql_str_list) + add_primary_key_str
                 logger.info('对 %s 表创建主键 %s', table_name, primary_keys)
                 session.execute(chg_pk_str)
 
@@ -245,6 +246,17 @@ def execute_sql(engine, sql_str, commit=False):
             session.commit()
 
     return insert_count
+
+
+def execute_scalar(engine, sql_str):
+    """
+    执行查询 sql 语句，返回一个结果值
+    :param engine:
+    :param sql_str:
+    :return:
+    """
+    with with_db_session(engine) as session:
+        return session.scalar(sql_str)
 
 
 class DynamicEngine:
@@ -278,18 +290,21 @@ class DynamicEngine:
 
 
 if __name__ == "__main__":
+    from sqlalchemy import create_engine
+
     engine = create_engine("mysql://mg:Dcba1234@localhost/md_integration?charset=utf8",
                            echo=False, encoding="utf-8")
     table_name = 'test_only'
-    if not engine.has_table(table_name):
-        df = pd.DataFrame({'a': [1.0, 11.0], 'b': [2.0, 22.0], 'c': [3, 33], 'd': [4, 44]})
-        df.to_sql(table_name, engine, index=False, if_exists='append')
-        with with_db_session(engine) as session:
-            session.execute("""ALTER TABLE {table_name}
-        CHANGE COLUMN a a DOUBLE NOT NULL FIRST,
-        CHANGE COLUMN d d INTEGER,
-        ADD PRIMARY KEY (a)""".format(table_name=table_name))
+    # if not engine.has_table(table_name):
+    #     df = pd.DataFrame({'a': [1.0, 11.0], 'b': [2.0, 22.0], 'c': [3, 33], 'd': [4, 44]})
+    #     df.to_sql(table_name, engine, index=False, if_exists='append')
+    #     with with_db_session(engine) as session:
+    #         session.execute("""ALTER TABLE {table_name}
+    #     CHANGE COLUMN a a DOUBLE NOT NULL FIRST,
+    #     CHANGE COLUMN d d INTEGER,
+    #     ADD PRIMARY KEY (a)""".format(table_name=table_name))
 
     df = pd.DataFrame({'a': [1.0, 111.0], 'b': [2.2, 222.0], 'c': [np.nan, np.nan]})
-    insert_count = bunch_insert_on_duplicate_update(df, table_name, engine, dtype=None)
+    insert_count = bunch_insert_on_duplicate_update(df, table_name, engine, dtype=None, myisam_if_create_table=True,
+                                                    primary_keys=['a', 'b'], schema='md_integration')
     print(insert_count)
