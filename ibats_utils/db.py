@@ -295,6 +295,24 @@ def has_primary_key(table_name, engine, table_schema):
         return key_list
 
 
+def get_table_col(table_name, engine, table_schema):
+    """
+    获取表 列名称列表，返回格式：[列名称，列类型，是否主键]
+    :param table_name:
+    :return:
+    """
+    sql_str = """SELECT column_name, column_type, COLUMN_KEY
+        FROM information_schema.columns
+        WHERE table_schema=:table_schema AND table_name=:table_name"""
+    with with_db_session(engine) as session:
+        table = session.execute(sql_str, params={
+            'table_schema': table_schema,
+            'table_name': table_name,
+        })
+        key_list = [(col_name, col_type, col_key == 'PRI') for col_name, col_type, col_key in table.fetchall()]
+        return key_list
+
+
 class DynamicEngine:
 
     def __init__(self, db_url_dic):
