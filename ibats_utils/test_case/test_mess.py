@@ -7,8 +7,13 @@
 @contact : mmmaaaggg@163.com
 @desc    : 
 """
+import time
 import unittest
-from ibats_utils.mess import pattern_datatime_format
+from ibats_utils.mess import pattern_datatime_format, try_n_times
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class PatternDatatimeFormatTest(unittest.TestCase):  # 继承unittest.TestCase
@@ -39,5 +44,34 @@ class PatternDatatimeFormatTest(unittest.TestCase):  # 继承unittest.TestCase
         self.assertEqual(dt, '%Y%m%d %H-%M-%S')
 
 
+class TryNTimesTest(unittest.TestCase):  # 继承unittest.TestCase
+
+    def setUp(self):
+        # 每个测试用例执行之前做操作
+        self.try_count = 0
+
+    def test_try_n_times(self):
+        @try_n_times(times=3, logger=logger, timeout=1)
+        def func():
+            self.try_count += 1
+            logger.debug("call func %d", self.try_count)
+            if self.try_count <= 2:
+                # 前N次尝试，每次被调用时睡眠3秒钟
+                times = 0
+                while True:
+                    time.sleep(0.1)
+                    times += 1
+                    if times >= 40:
+                        break
+
+            logger.debug("call func %d return", self.try_count)
+            return self.try_count
+
+        ret_data = func()
+        logger.info("ret_data = %d", ret_data)
+        self.assertEqual(ret_data, 3)
+
+
 if __name__ == '__main__':
     unittest.main()  # 运行所有的测试用例
+

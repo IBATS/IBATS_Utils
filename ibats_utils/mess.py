@@ -1373,6 +1373,21 @@ def merge_nav_from_file(file_list, date_from=None):
     return nav_merged_df, nav_df, stat_df
 
 
+def create_instance(module_name, class_name, *args, **kwargs):
+    """
+    参见例子：src/fh_tools/language_test/base_test/dynamic_import_demo/dynamic_load.py
+    :param module_name: 例如："src.fh_tools.language_test.base_test.dynamic_import_demo.a_class"
+    :param class_name: 例如："AClass"
+    :param args: "my_name" 类初始化参数
+    :param kwargs:
+    :return:
+    """
+    module_meta = __import__(module_name, globals(), locals(), [class_name])
+    class_meta = getattr(module_meta, class_name)
+    obj = class_meta(*args, **kwargs)
+    return obj
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)s|%(funcName)s:%(lineno)d %(levelname)s %(message)s')
     logger = logging.getLogger()
@@ -1472,30 +1487,3 @@ if __name__ == "__main__":
     #     raise Exception('some error')
     #
     # foo(1, 2, 3, 4, e=5, f=6)
-
-    # 测试 try_n_times
-    try_count = [0]
-    def test_try_n_times():
-        """测试 try_n_times 方法"""
-
-        @try_n_times(times=3, logger=logger, timeout=1)
-        def func():
-            global try_count
-            try_count[0] += 1
-            logger.debug("call func %d", try_count[0])
-            if try_count[0] <= 2:
-                # 前N次尝试，每次被调用时睡眠3秒钟
-                times = 0
-                while True:
-                    time.sleep(0.1)
-                    times += 1
-                    if times >= 40:
-                        break
-
-            logger.debug("call func %d return", try_count[0])
-            return try_count[0]
-
-        ret_data = func()
-        logger.info("ret_data = %d", ret_data)
-
-    test_try_n_times()

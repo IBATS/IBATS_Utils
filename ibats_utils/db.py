@@ -9,7 +9,7 @@
 """
 import pandas as pd
 import numpy as np
-from sqlalchemy import MetaData, Table
+from sqlalchemy import MetaData, Table, create_engine
 from sqlalchemy.orm.session import Session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import DeclarativeMeta
@@ -344,8 +344,6 @@ class DynamicEngine:
 
 
 if __name__ == "__main__":
-    from sqlalchemy import create_engine
-
     engine = create_engine("mysql://mg:Dcba1234@localhost/md_integration?charset=utf8",
                            echo=False, encoding="utf-8")
     table_name = 'test_only'
