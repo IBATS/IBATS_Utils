@@ -231,16 +231,17 @@ def bunch_insert_on_duplicate_update(df: pd.DataFrame, table_name, engine, dtype
     return insert_count
 
 
-def execute_sql(engine, sql_str, commit=False):
+def execute_sql(sql_str, engine, params=None, commit=False):
     """
     执行给的 sql 语句
-    :param engine:
     :param sql_str:
+    :param engine:
+    :param params:
     :param commit:
     :return:
     """
     with with_db_session(engine) as session:
-        rslt = session.execute(sql_str)
+        rslt = session.execute(sql_str, params=params)
         insert_count = rslt.rowcount
         if commit:
             session.commit()
@@ -248,15 +249,16 @@ def execute_sql(engine, sql_str, commit=False):
     return insert_count
 
 
-def execute_scalar(engine, sql_str):
+def execute_scalar(sql_str, engine, params=None):
     """
     执行查询 sql 语句，返回一个结果值
-    :param engine:
     :param sql_str:
+    :param engine:
+    :param params:
     :return:
     """
     with with_db_session(engine) as session:
-        return session.scalar(sql_str)
+        return session.scalar(sql_str, params=params)
 
 
 def get_primary_key(table_name, engine, table_schema):

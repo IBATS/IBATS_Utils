@@ -1375,6 +1375,7 @@ def merge_nav_from_file(file_list, date_from=None):
 
 def create_instance(module_name, class_name, *args, **kwargs):
     """
+    动态加载模块中的类，并实例化
     参见例子：src/fh_tools/language_test/base_test/dynamic_import_demo/dynamic_load.py
     :param module_name: 例如："src.fh_tools.language_test.base_test.dynamic_import_demo.a_class"
     :param class_name: 例如："AClass"
@@ -1382,10 +1383,22 @@ def create_instance(module_name, class_name, *args, **kwargs):
     :param kwargs:
     :return:
     """
-    module_meta = __import__(module_name, globals(), locals(), [class_name])
-    class_meta = getattr(module_meta, class_name)
+    class_meta = load_class(module_name, class_name)
     obj = class_meta(*args, **kwargs)
     return obj
+
+
+def load_class(module_name, class_name):
+    """
+    动态加载模块中的类
+    参见例子：src/fh_tools/language_test/base_test/dynamic_import_demo/dynamic_load.py
+    :param module_name: 例如："src.fh_tools.language_test.base_test.dynamic_import_demo.a_class"
+    :param class_name: 例如："AClass"
+    :return:
+    """
+    module_meta = __import__(module_name, globals(), locals(), [class_name])
+    class_meta = getattr(module_meta, class_name)
+    return class_meta
 
 
 if __name__ == "__main__":
