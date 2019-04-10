@@ -197,7 +197,7 @@ def bunch_insert_on_duplicate_update(df: pd.DataFrame, table_name, engine, dtype
         if myisam_if_create_table:
             logger.info('修改 %s 表引擎为 MyISAM', table_name)
             sql_str = f"ALTER TABLE {table_name} ENGINE = MyISAM"
-            execute_sql(engine, sql_str, commit=True)
+            execute_sql(sql_str, engine, commit=True)
         # 创建主键
         if primary_keys is not None:
             if schema is None:
