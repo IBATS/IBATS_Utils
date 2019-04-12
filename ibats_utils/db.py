@@ -345,20 +345,51 @@ class DynamicEngine:
         return iter(self._engine_dic)
 
 
-if __name__ == "__main__":
-    engine = create_engine("mysql://mg:Dcba1234@localhost/md_integration?charset=utf8",
-                           echo=False, encoding="utf-8")
-    table_name = 'test_only'
-    # if not engine.has_table(table_name):
-    #     df = pd.DataFrame({'a': [1.0, 11.0], 'b': [2.0, 22.0], 'c': [3, 33], 'd': [4, 44]})
-    #     df.to_sql(table_name, engine, index=False, if_exists='append')
-    #     with with_db_session(engine) as session:
-    #         session.execute("""ALTER TABLE {table_name}
-    #     CHANGE COLUMN a a DOUBLE NOT NULL FIRST,
-    #     CHANGE COLUMN d d INTEGER,
-    #     ADD PRIMARY KEY (a)""".format(table_name=table_name))
+def drop_duplicate_data_from_table(table_name, engine, primary_key=None):
+    """
+    根据主键删除重复数据
+    做法：新建表并建立主键->将原有表数据导入到新表->删除旧表->重命名新表
+    :param table_name:
+    :param engine:
+    :param primary_key:
+    :return:
+    """
+    table_name_bak = f"{table_name}_bak"
+    has_table = engine.has_table(table_name)
+    if not has_table:
+        return
+    has_table = engine.has_table(table_name_bak)
+    with with_db_session(engine) as session:
+        if has_table:
+            sql_str = f"drop table {table_name_bak}"
+            session.execute(sql_str)
+            logger.debug('删除现有 %s 表', table_name_bak)
 
-    df = pd.DataFrame({'a': [1.0, 111.0], 'b': [2.2, 222.0], 'c': [np.nan, np.nan]})
-    insert_count = bunch_insert_on_duplicate_update(df, table_name, engine, dtype=None, myisam_if_create_table=True,
-                                                    primary_keys=['a', 'b'], schema='md_integration')
-    print(insert_count)
+        sql_str = f"create table {table_name_bak} like {table_name}"
+        session.execute(sql_str)
+        logger.debug('创建 %s 表', table_name_bak)
+        if primary_key is not None:
+            key_str = ', '.join(primary_key)
+            sql_str = f"""alter table {table_name_bak}
+                add constraint {table_name}_pk
+                primary key ({key_str})"""
+            session.execute(sql_str)
+            logger.debug('创建 %s 表 主键 %s：', table_name_bak, key_str)
+
+        sql_str = f"replace into {table_name_bak} select * from {table_name}"
+        session.execute(sql_str)
+        session.commit()
+        logger.debug('插入数据 %s -> %s', table_name, table_name_bak)
+        sql_str = f"drop table {table_name}"
+        session.execute(sql_str)
+        logger.debug('删除 %s 表', table_name)
+        sql_str = f"rename table {table_name_bak} to {table_name}"
+        session.execute(sql_str)
+        logger.debug('重命名 %s --> %s', table_name_bak, table_name)
+
+
+if __name__ == "__main__":
+    # engine = create_engine("mysql://mg:Dcba1234@localhost/md_integration?charset=utf8",
+    #                        echo=False, encoding="utf-8")
+    # table_name = 'test_only'
+    pass
