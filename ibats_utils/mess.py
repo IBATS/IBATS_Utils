@@ -1401,6 +1401,25 @@ def load_class(module_name, class_name):
     return class_meta
 
 
+def decorator_timer(func):
+    """
+    为当期程序进行计时
+    :param func:
+    :return:
+    """
+    @functools.wraps(func)
+    def timer_func(*args, **kwargs):
+        start = time.time()
+        try:
+            return func(*args, **kwargs)
+        finally:
+            end = time.time()
+            estimate = time.strftime('%H:%M:%S', time.gmtime(end - start))
+            logger.debug('%s 运行时间：%s 相关参数 (%s, %s)', func.__name__, estimate, args, kwargs)
+
+    return timer_func
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)s|%(funcName)s:%(lineno)d %(levelname)s %(message)s')
     logger = logging.getLogger()

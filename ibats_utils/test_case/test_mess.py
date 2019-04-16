@@ -9,7 +9,7 @@
 """
 import time
 import unittest
-from ibats_utils.mess import pattern_datatime_format, try_n_times
+from ibats_utils.mess import pattern_datatime_format, try_n_times, decorator_timer
 import logging
 
 logging.basicConfig(level=logging.DEBUG,
@@ -71,6 +71,17 @@ class TryNTimesTest(unittest.TestCase):  # 继承unittest.TestCase
         ret_data = func()
         logger.info("ret_data = %d", ret_data)
         self.assertEqual(ret_data, 3)
+
+
+class DecoratorTimerTest(unittest.TestCase):  # 继承unittest.TestCase
+
+    def test_func(self):
+        @decorator_timer
+        def func1(num):
+            time.sleep(num)
+            return num
+
+        self.assertEqual(func1(10), 10)
 
 
 if __name__ == '__main__':
