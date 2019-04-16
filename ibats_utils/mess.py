@@ -1415,7 +1415,7 @@ def decorator_timer(func):
         finally:
             end = time.time()
             estimate = time.strftime('%H:%M:%S', time.gmtime(end - start))
-            logger.debug('%s 运行时间：%s 相关参数 (%s, %s)', func.__name__, estimate, args, kwargs)
+            logger.info('%s 运行时间：%s 相关参数 (%s, %s)', func.__name__, estimate, args, kwargs)
 
     return timer_func
 
