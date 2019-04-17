@@ -1421,7 +1421,7 @@ def decorator_timer(func):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)s|%(funcName)s:%(lineno)d %(levelname)s %(message)s')
+    # logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)s|%(funcName)s:%(lineno)d %(levelname)s %(message)s')
     logger = logging.getLogger()
     # # 基金绩效分析
     # from pandas.io.formats.excel import ExcelCell

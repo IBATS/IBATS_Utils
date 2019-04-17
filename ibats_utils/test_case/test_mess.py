@@ -12,8 +12,8 @@ import unittest
 from ibats_utils.mess import pattern_datatime_format, try_n_times, decorator_timer
 import logging
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(name)s|%(funcName)s:%(lineno)d %(levelname)s %(message)s')
+# logging.basicConfig(level=logging.DEBUG,
+#                     format='%(asctime)s %(name)s|%(funcName)s:%(lineno)d %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
 
 
