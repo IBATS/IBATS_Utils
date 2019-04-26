@@ -10,6 +10,7 @@
 import pandas as pd
 import numpy as np
 from sqlalchemy import MetaData, Table, create_engine
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.session import Session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import DeclarativeMeta
@@ -225,7 +226,11 @@ def bunch_insert_on_duplicate_update(df: pd.DataFrame, table_name, engine, dtype
                 add_primary_key_str = f",\nADD PRIMARY KEY ({primary_keys_str})"
                 chg_pk_str = f"ALTER TABLE {table_name}\n" + "\n".join(col_name_sql_str_list) + add_primary_key_str
                 logger.info('对 %s 表创建主键 %s', table_name, primary_keys)
-                session.execute(chg_pk_str)
+                try:
+                    session.execute(chg_pk_str)
+                except IntegrityError:
+                    logger.exception('建立 %s 表主键 %s 时出现异常，将对表进行重建以修复主键异常')
+                    drop_duplicate_data_from_table(table_name, engine, primary_keys)
 
     logger.debug('%s 新增数据 (%d, %d)', table_name, insert_count, df.shape[1])
     return insert_count

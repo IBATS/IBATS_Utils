@@ -13,7 +13,7 @@ with open("README.md", "r", encoding='utf-8') as rm:
     long_description = rm.read()
 
 setup(name='IBATS_Utils',
-      version='1.1.10',
+      version='1.1.11',
       description='IBATS 通用工具，该工具涉及数据库、量化、以及一些通用工具',
       long_description=long_description,
       long_description_content_type='text/markdown',
