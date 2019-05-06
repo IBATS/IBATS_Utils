@@ -576,8 +576,8 @@ CACHE_FOLDER_PATH_DIC = {}
 def get_folder_path(target_folder_name=None, create_if_not_found=True):
     """
     获得系统缓存目录路径
-    :param target_folder_name: 缓存目录名称
-    :param create_if_not_found: 如果不存在则创建一个目录，默认：True
+    :param target_folder_name: 缓存目录名称 或 正则表达式
+    :param create_if_not_found: 如果不存在则创建一个目录，默认：True，当 target_folder_name 为正则表达式时，无法创建目录
     :return: 缓存路径
     """
     global CACHE_FOLDER_PATH_DIC
@@ -593,7 +593,13 @@ def get_folder_path(target_folder_name=None, create_if_not_found=True):
             dir_list = os.listdir(par_path)
             for dir_name in dir_list:
                 # print d # .strip()
-                if dir_name == target_folder_name:
+                if isinstance(target_folder_name, re._pattern_type):
+                    match = target_folder_name.match(dir_name)
+                    if match is not None:
+                        cache_folder_path_tmp = os.path.join(par_path, dir_name)
+                        logger.debug('<%s>', cache_folder_path_tmp)
+                        break
+                elif dir_name == target_folder_name:
                     cache_folder_path_tmp = os.path.join(par_path, dir_name)
                     logger.debug('<%s>', cache_folder_path_tmp)
                     break
@@ -601,7 +607,7 @@ def get_folder_path(target_folder_name=None, create_if_not_found=True):
                 break
             par_path = os.path.abspath(os.path.join(par_path, os.path.pardir))
         if cache_folder_path_tmp is None:
-            if create_if_not_found:
+            if create_if_not_found and not isinstance(target_folder_name, re._pattern_type):
                 cache_folder_path_tmp = os.path.abspath(os.path.join(parent_folder_path, target_folder_name))
                 logger.debug('<%s> 创建缓存目录', cache_folder_path_tmp)
                 os.makedirs(cache_folder_path_tmp)
