@@ -1442,14 +1442,44 @@ def open_file_with_system_app(file_path):
         webbrowser.open(f'file:///{file_path}')
 
 
+def get_project_root_path():
+    import sys
+    import os
+    work_path = os.getcwd()
+    # path_list = []
+    # for path in sys.path:
+    #     if work_path.find(path) == 0:
+    #         print(path)
+    #         path_list.append(path)
+    path_list = list({_ for _ in sys.path if work_path.find(_) == 0})
+    path_list.sort(key=len)
+    project_root_path = path_list[0]
+    return project_root_path, work_path
+
+
+def get_module_path(stg_class: type):
+    import os
+    import sys
+    module_path = stg_class.__module__
+    if module_path == '__main__':
+        project_root_path, work_path = get_project_root_path()
+        module_file_path = os.path.splitext(sys.argv[0])[0]
+        module_segment = [str(_) for _ in module_file_path[len(project_root_path):].split(os.path.sep) if _ != '']
+        module_path = '.'.join(module_segment)
+    return module_path
+
+
 if __name__ == "__main__":
-    # logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)s|%(funcName)s:%(lineno)d %(levelname)s %(message)s')
-    logger = logging.getLogger()
+    pass
+    # logging.basicConfig(level=logging.DEBUG,
+    #   format='%(asctime)s %(name)s|%(funcName)s:%(lineno)d %(levelname)s %(message)s')
+    # logger = logging.getLogger()
     # # 基金绩效分析
     # from pandas.io.formats.excel import ExcelCell
     # file_path = r'd:\WSPych\fof_ams\Stage\periodic_task\analysis_cache\2016-6-1_2018-6-1\各策略指数走势_按机构.csv'
     # file_path_no_extention, _ = os.path.splitext(file_path)
-    # stat_df, sheet_mdd_df_dic, sheet_mon_rr_dic = return_risk_analysis_by_xls(file_path, encoding='GBK')  # , date_col="日期", nav_col_list=['产品净值']
+    # stat_df, sheet_mdd_df_dic, sheet_mon_rr_dic = return_risk_analysis_by_xls(
+    #   file_path, encoding='GBK')  # , date_col="日期", nav_col_list=['产品净值']
     # if stat_df is not None:
     #     stat_df.to_csv('%s_绩效统计.csv' % file_path_no_extention, encoding='GBK')
     # for sheet_name, mdd_df in sheet_mdd_df_dic.items():
