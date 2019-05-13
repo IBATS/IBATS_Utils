@@ -1426,6 +1426,22 @@ def decorator_timer(func):
     return timer_func
 
 
+def open_file_with_system_app(file_path):
+    import platform
+    try:
+        if platform.system() == 'Windows':
+            os.startfile(file_path)
+        elif platform.system() == 'Linux':
+            import subprocess
+            subprocess.call(["xdg-open", file_path])
+        else:
+            import subprocess
+            subprocess.call(["open", file_path])
+    except:
+        import webbrowser
+        webbrowser.open(f'file:///{file_path}')
+
+
 if __name__ == "__main__":
     # logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)s|%(funcName)s:%(lineno)d %(levelname)s %(message)s')
     logger = logging.getLogger()
