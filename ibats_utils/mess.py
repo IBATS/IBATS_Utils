@@ -1426,17 +1426,23 @@ def decorator_timer(func):
     return timer_func
 
 
-def open_file_with_system_app(file_path):
+def open_file_with_system_app(file_path, asyn=True):
     import platform
     try:
         if platform.system() == 'Windows':
             os.startfile(file_path)
         elif platform.system() == 'Linux':
             import subprocess
-            subprocess.call(["xdg-open", file_path])
+            if asyn:
+                subprocess.Popen(["xdg-open", file_path])
+            else:
+                subprocess.call(["xdg-open", file_path])
         else:
             import subprocess
-            subprocess.call(["open", file_path])
+            if asyn:
+                subprocess.Popen(["open", file_path])
+            else:
+                subprocess.call(["open", file_path])
     except:
         import webbrowser
         webbrowser.open(f'file:///{file_path}')
