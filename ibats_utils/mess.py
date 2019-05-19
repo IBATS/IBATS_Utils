@@ -1469,7 +1469,8 @@ def get_module_path(stg_class: type):
     module_path = stg_class.__module__
     if module_path == '__main__':
         project_root_path, work_path = get_project_root_path()
-        module_file_path = os.path.splitext(sys.argv[0])[0]
+        # windows 环境下，sys.argv[0] 中路径分割为 "/" 而系统分隔符为 r"\" 导致匹配失败，因此需要进行一次转换
+        module_file_path = os.path.splitext(sys.argv[0])[0].replace('/', os.path.sep)
         module_segment = [str(_) for _ in module_file_path[len(project_root_path):].split(os.path.sep) if _ != '']
         module_path = '.'.join(module_segment)
     return module_path
