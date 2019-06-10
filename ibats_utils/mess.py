@@ -22,6 +22,7 @@ from functools import reduce
 import xlrd
 import threading
 import math
+import platform
 
 logger = logging.getLogger(__name__)
 STR_FORMAT_DATE = '%Y-%m-%d'
@@ -465,10 +466,10 @@ def pd_timedelta_2_timedelta(value):
     return dt_value
 
 
-def get_first(iterable, func):
-    for n in iterable:
-        if func(n):
-            return n
+def get_first(iterable, func, ret_func=None):
+    for val in iterable:
+        if func(val):
+            return val if ret_func is None else ret_func(val)
     return None
 
 
@@ -479,11 +480,12 @@ def get_first_idx(iterable, func):
     return None
 
 
-def get_last(iterable, func):
+def get_last(iterable, comp_func, ret_func=None):
     count = len(iterable)
     for n in range(count - 1, -1, -1):
-        if func(iterable[n]):
-            return iterable[n]
+        val = iterable[n]
+        if comp_func(val):
+            return val if ret_func is None else ret_func(val)
     return None
 
 
@@ -1427,7 +1429,6 @@ def decorator_timer(func):
 
 
 def open_file_with_system_app(file_path, asyn=True):
-    import platform
     try:
         if platform.system() == 'Windows':
             os.startfile(file_path)
@@ -1446,6 +1447,14 @@ def open_file_with_system_app(file_path, asyn=True):
     except:
         import webbrowser
         webbrowser.open(f'file:///{file_path}')
+
+
+def is_windows_os():
+    return platform.system() == 'Windows'
+
+
+def is_linux_os():
+    return platform.system() == 'Linux'
 
 
 def get_project_root_path():
