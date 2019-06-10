@@ -9,7 +9,7 @@
 """
 import time
 import unittest
-from ibats_utils.mess import pattern_datatime_format, try_n_times, decorator_timer
+from ibats_utils.mess import pattern_datatime_format, try_n_times, decorator_timer, get_chinese_font_iter
 import logging
 
 # logging.basicConfig(level=logging.DEBUG,
@@ -82,6 +82,17 @@ class DecoratorTimerTest(unittest.TestCase):  # 继承unittest.TestCase
             return num
 
         self.assertEqual(func1(10), 10)
+
+
+class GetChineseFontIterTest(unittest.TestCase):  # 继承unittest.TestCase
+
+    def test_func(self):
+        print('*' * 10, '可用的字体', '*' * 10)
+        num = 0
+        for num, f in enumerate(get_chinese_font_iter(), start=1):
+            print(f'{num}) {f}')
+
+        self.assertGreaterEqual(num, 1)
 
 
 if __name__ == '__main__':

@@ -23,6 +23,8 @@ import xlrd
 import threading
 import math
 import platform
+from matplotlib.font_manager import FontManager
+import subprocess
 
 logger = logging.getLogger(__name__)
 STR_FORMAT_DATE = '%Y-%m-%d'
@@ -1455,6 +1457,24 @@ def is_windows_os():
 
 def is_linux_os():
     return platform.system() == 'Linux'
+
+
+def get_chinese_font_iter():
+    fm = FontManager()
+    mat_fonts = set(f.name for f in fm.ttflist)
+
+    output = subprocess.check_output(
+        'fc-list :lang=zh -f "%{family}\n"', shell=True)
+    output = output.decode('utf-8')
+    # print '*' * 10, '系统可用的中文字体', '*' * 10
+    # print output
+    zh_fonts = set(f.split(',', 1)[0] for f in output.split('\n'))
+    available = mat_fonts & zh_fonts
+    yield from available
+
+    # print('*' * 10, '可用的字体', '*' * 10)
+    # for num, f in enumerate(available, start=1):
+    #     print(num, ')', f)
 
 
 def get_project_root_path():

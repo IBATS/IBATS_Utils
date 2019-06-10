@@ -13,7 +13,7 @@ with open("README.md", "r", encoding='utf-8') as rm:
     long_description = rm.read()
 
 setup(name='IBATS_Utils',
-      version='1.1.17',
+      version='1.2.0',
       description='IBATS 通用工具，该工具涉及数据库、量化、以及一些通用工具',
       long_description=long_description,
       long_description_content_type='text/markdown',
@@ -41,4 +41,5 @@ setup(name='IBATS_Utils',
           'redis>=2.10.6',
           'SQLAlchemy>=1.2.8',
           'xlrd>=1.1.0',
+          'matplotlib',
       ])
