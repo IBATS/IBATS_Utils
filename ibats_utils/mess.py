@@ -1505,6 +1505,30 @@ def get_module_path(stg_class: type):
     return module_path
 
 
+def counting_years(date_from_str, date_to_str):
+    """
+    用于计算两个日期之间相差多少年？返回float类型
+    :param date_from_str:
+    :param date_to_str:
+    :return:
+    """
+    # date_from_str, date_to_str = '2018-05-01', '2019-05-31'
+    date_from = str_2_date(date_from_str)
+    date_to = str_2_date(date_to_str)
+
+    year_start = str_2_date(f'{date_from.year}-01-01')
+    year_end = str_2_date(f'{date_from.year}-12-31')
+    ret_val1 = ((year_end - date_from).days + 1) / ((year_end - year_start).days + 1)
+
+    year_start = str_2_date(f'{date_to.year}-01-01')
+    year_end = str_2_date(f'{date_to.year}-12-31')
+    ret_val2 = ((date_to - year_start).days + 1) / ((year_end - year_start).days + 1)
+
+    ret_val = ret_val1 + ret_val2 + (date_to.year - date_from.year - 1)
+
+    return ret_val
+
+
 if __name__ == "__main__":
     pass
     # logging.basicConfig(level=logging.DEBUG,
