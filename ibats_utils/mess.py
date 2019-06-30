@@ -25,6 +25,8 @@ import math
 import platform
 from matplotlib.font_manager import FontManager
 import subprocess
+import importlib
+import shutil
 
 logger = logging.getLogger(__name__)
 STR_FORMAT_DATE = '%Y-%m-%d'
@@ -1529,6 +1531,44 @@ def counting_years(date_from_str, date_to_str):
     return ret_val
 
 
+def get_module_file_path(stg_class: type):
+    module_path = stg_class.__module__
+    module = importlib.import_module(module_path)
+    return module.__file__
+
+
+def _test_get_module_file_path():
+    from  ibats_common.example.tflearn.lstm3_stg import AIStg
+    file_path = get_module_file_path(AIStg)
+    print(file_path)
+
+
+def copy_module_file_to(module_str_or_class, folder_path):
+    """将模板备份到指定目录下，不改变文件名"""
+    if isinstance(module_str_or_class, str):
+        module = importlib.import_module(module_str_or_class)
+    # elif hasattr(module_str_or_class, '__module__'):
+    #     module = importlib.import_module(module_str_or_class.__module__)
+    elif isinstance(module_str_or_class, type):
+        module = importlib.import_module(module_str_or_class.__module__)
+    elif hasattr(module_str_or_class, '__file__'):
+        module =module_str_or_class
+    else:
+        raise ValueError(f'{module_str_or_class} <{type(module_str_or_class)}> 不是有效的对象')
+
+    file_path = module.__file__
+    _, file_name = os.path.split(file_path)
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    new_file_path = os.path.join(folder_path, file_name)
+    shutil.copy(file_path, new_file_path)
+    return new_file_path
+
+
+def _test_copy_module_file_to():
+    copy_module_file_to(DataFrame, r'd:\Downloads')
+
+
 if __name__ == "__main__":
     pass
     # logging.basicConfig(level=logging.DEBUG,
@@ -1631,3 +1671,6 @@ if __name__ == "__main__":
     #     raise Exception('some error')
     #
     # foo(1, 2, 3, 4, e=5, f=6)
+
+    # _test_get_module_file_path()
+    _test_copy_module_file_to()
