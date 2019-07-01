@@ -1538,8 +1538,8 @@ def get_module_file_path(stg_class: type):
 
 
 def _test_get_module_file_path():
-    from  ibats_common.example.tflearn.lstm3_stg import AIStg
-    file_path = get_module_file_path(AIStg)
+    # from ibats_common.example.tflearn.lstm3_stg import AIStg
+    file_path = get_module_file_path(DataFrame)
     print(file_path)
 
 
@@ -1557,6 +1557,17 @@ def copy_module_file_to(module_str_or_class, folder_path):
         raise ValueError(f'{module_str_or_class} <{type(module_str_or_class)}> 不是有效的对象')
 
     file_path = module.__file__
+    # _, file_name = os.path.split(file_path)
+    # if not os.path.exists(folder_path):
+    #     os.makedirs(folder_path)
+    # new_file_path = os.path.join(folder_path, file_name)
+    # shutil.copy(file_path, new_file_path)
+    # return new_file_path
+    return copy_file_to(file_path, folder_path)
+
+
+def copy_file_to(file_path, folder_path):
+    """将文件拷贝到指定目录"""
     _, file_name = os.path.split(file_path)
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
