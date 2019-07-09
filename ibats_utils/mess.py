@@ -1580,6 +1580,21 @@ def _test_copy_module_file_to():
     copy_module_file_to(DataFrame, r'd:\Downloads')
 
 
+def copy_folder_to(source_folder_path, target_folder_path):
+    """将文件拷贝到指定目录，文件名不变"""
+    _, folder_name = os.path.split(source_folder_path)
+    new_folder_path = os.path.join(target_folder_path, folder_name)
+    if os.path.exists(new_folder_path):
+        shutil.rmtree(new_folder_path)
+    shutil.copytree(source_folder_path, new_folder_path)
+    return new_folder_path
+
+
+def _test_copy_folder_to():
+    folder_path = r'/home/mg/github/IBATS_Common/ibats_common/example/drl/d3qn1'
+    copy_folder_to(folder_path, r'/home/mg/Downloads')
+
+
 if __name__ == "__main__":
     pass
     # logging.basicConfig(level=logging.DEBUG,
@@ -1683,5 +1698,6 @@ if __name__ == "__main__":
     #
     # foo(1, 2, 3, 4, e=5, f=6)
 
-    # _test_get_module_file_path()
-    _test_copy_module_file_to()
+    _test_get_module_file_path()
+    # _test_copy_module_file_to()
+    # _test_copy_folder_to()
