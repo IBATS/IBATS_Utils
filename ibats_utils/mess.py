@@ -27,6 +27,7 @@ from matplotlib.font_manager import FontManager
 import subprocess
 import importlib
 import shutil
+import random
 
 logger = logging.getLogger(__name__)
 STR_FORMAT_DATE = '%Y-%m-%d'
@@ -1593,6 +1594,52 @@ def copy_folder_to(source_folder_path, target_folder_path):
 def _test_copy_folder_to():
     folder_path = r'/home/mg/github/IBATS_Common/ibats_common/example/drl/d3qn1'
     copy_folder_to(folder_path, r'/home/mg/Downloads')
+
+
+def sample_weighted(ll, weights, k):
+    """
+    带权重、非重复取样
+    :param ll:
+    :param weights:
+    :param k:
+    :return:
+    """
+    ll_len = len(ll)
+    if ll_len < k:
+        raise ValueError(f"len(ll)={ll_len}<{k}")
+    elif ll_len == k:
+        return random.sample(ll, k)
+    else:
+        new_ll = list(range(len(ll)))
+        new_ll_set = set(new_ll)
+        new_weights = np.array(weights)
+        new_k = k
+        result_tot = []
+        while True:
+            result = random.choices(new_ll, weights=new_weights[new_ll], k=new_k)
+            result_set = set(result)
+            result_tot.extend(result_set)
+            new_ll_set -= result_set
+            new_k = k - len(result_tot)
+            new_ll = list(new_ll_set)
+            if new_k == 0:
+                break
+
+        result_tot.sort()
+        if isinstance(ll, np.ndarray):
+            ret = ll[result_tot]
+        else:
+            ret = [ll[_] for _ in result_tot]
+        return ret
+
+
+def _test_weighted_sample():
+    ll = list(range(1, 30))
+    result = sample_weighted(ll, weights=ll, k=15)
+    print(result)
+    ll = np.eye(29)
+    result = sample_weighted(ll, weights=np.arange(1, 30), k=15)
+    print(result)
 
 
 if __name__ == "__main__":
