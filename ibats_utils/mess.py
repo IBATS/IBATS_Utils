@@ -214,6 +214,19 @@ def str_2_float(sth) -> (float, None):
     return ret_val
 
 
+def format_2_str(value, formator):
+    """根据 formator 将对象格式化成 str"""
+    if formator is None:
+        text = str(value)
+    elif isinstance(formator, str):
+        text = str.format(formator, value)
+    elif callable(formator):
+        text = formator(value)
+    else:
+        raise ValueError('%s: %s 无效', value, formator)
+    return text
+
+
 class TryThread(threading.Thread):
 
     def __init__(self, target, *args, **kwargs):
