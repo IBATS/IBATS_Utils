@@ -15,7 +15,7 @@ logging_config = dict(
     version=1,
     formatters={
         'simple': {
-            'format': '%(asctime)s %(name)s|%(module)s.%(funcName)s:%(lineno)d %(levelname)s %(message)s'}
+            'format': '%(asctime)s %(levelname)s %(name)s %(filename)s.%(funcName)s:%(lineno)d|%(message)s'}
     },
     handlers={
         'file_handler':
