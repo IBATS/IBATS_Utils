@@ -322,9 +322,11 @@ def get_table_col(table_name, engine, table_schema):
 
 class DynamicEngine:
 
-    def __init__(self, db_url_dic):
+    def __init__(self, db_url_dic, **kwargs):
         self._engine_dic = {}
         self.db_url_dic = db_url_dic
+        kwargs.setdefault('pool_pre_ping', True)
+        self.kwargs = kwargs
 
     def reload_engines(self, refresh=False):
         """
@@ -337,9 +339,10 @@ class DynamicEngine:
         for key, url in self.db_url_dic.items():
             if not refresh and key in self._engine_dic:
                 continue
-            engine = create_engine(url)
+            engine = create_engine(url, **self.kwargs)
             self._engine_dic[key] = engine
-            logger.debug('加载 engine %s: %s', key, engine)
+            logger.debug('加载 engine %s: %s %s',
+                         key, engine, '' if self.kwargs is None or len(self.kwargs) == 0 else self.kwargs)
 
     def __getitem__(self, item):
         if item not in self._engine_dic:
