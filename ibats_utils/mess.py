@@ -613,7 +613,7 @@ def get_folder_path(target_folder_name=None, create_if_not_found=True):
             dir_list = os.listdir(par_path)
             for dir_name in dir_list:
                 # print d # .strip()
-                if isinstance(target_folder_name, re._pattern_type):
+                if isinstance(target_folder_name, re.Pattern):
                     match = target_folder_name.match(dir_name)
                     if match is not None:
                         cache_folder_path_tmp = os.path.join(par_path, dir_name)
@@ -627,7 +627,7 @@ def get_folder_path(target_folder_name=None, create_if_not_found=True):
                 break
             par_path = os.path.abspath(os.path.join(par_path, os.path.pardir))
         if cache_folder_path_tmp is None:
-            if create_if_not_found and not isinstance(target_folder_name, re._pattern_type):
+            if create_if_not_found and not isinstance(target_folder_name, re.Pattern):
                 cache_folder_path_tmp = os.path.abspath(os.path.join(parent_folder_path, target_folder_name))
                 logger.debug('<%s> 创建缓存目录', cache_folder_path_tmp)
                 os.makedirs(cache_folder_path_tmp)
