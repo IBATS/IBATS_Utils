@@ -593,6 +593,19 @@ def get_cntr_kind_name(contract_name):
 CACHE_FOLDER_PATH_DIC = {}
 
 
+def is_pattern_type(obj):
+    """
+    判断当前对象是否是 Pattern 类
+    3.7以后 re._pattern_type 被废弃，re.Pattern开始启用。此写法为了兼容3.6. 以及 3.7 以后版本
+    :param obj:
+    :return:
+    """
+    try:
+        return isinstance(obj, re.Pattern)
+    except AttributeError:
+        return isinstance(obj, re._pattern_type)
+
+
 def get_folder_path(target_folder_name=None, create_if_not_found=True):
     """
     获得系统缓存目录路径
@@ -613,7 +626,7 @@ def get_folder_path(target_folder_name=None, create_if_not_found=True):
             dir_list = os.listdir(par_path)
             for dir_name in dir_list:
                 # print d # .strip()
-                if isinstance(target_folder_name, re.Pattern):
+                if is_pattern_type(target_folder_name):
                     match = target_folder_name.match(dir_name)
                     if match is not None:
                         cache_folder_path_tmp = os.path.join(par_path, dir_name)
@@ -627,7 +640,7 @@ def get_folder_path(target_folder_name=None, create_if_not_found=True):
                 break
             par_path = os.path.abspath(os.path.join(par_path, os.path.pardir))
         if cache_folder_path_tmp is None:
-            if create_if_not_found and not isinstance(target_folder_name, re.Pattern):
+            if create_if_not_found and not is_pattern_type(target_folder_name):
                 cache_folder_path_tmp = os.path.abspath(os.path.join(parent_folder_path, target_folder_name))
                 logger.debug('<%s> 创建缓存目录', cache_folder_path_tmp)
                 os.makedirs(cache_folder_path_tmp)
