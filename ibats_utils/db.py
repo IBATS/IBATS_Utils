@@ -7,10 +7,12 @@
 @contact : mmmaaaggg@163.com
 @desc    : 数据库相关工具
 """
+import typing
 import pandas as pd
 import numpy as np
 from sqlalchemy import MetaData, Table, create_engine
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm.session import Session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import DeclarativeMeta
@@ -38,10 +40,14 @@ class SessionWrapper:
         # logger.debug('db session closed')
 
 
-def with_db_session(engine, expire_on_commit=True):
+def with_db_session(engine: typing.Union[Session, Engine], expire_on_commit=True):
     """创建session对象，返回 session_wrapper 可以使用with语句进行调用"""
-    db_session = sessionmaker(bind=engine, expire_on_commit=expire_on_commit)
-    session = db_session()
+    if isinstance(engine, Session):
+        session = engine
+    else:
+        db_session = sessionmaker(bind=engine, expire_on_commit=expire_on_commit)
+        session = db_session()
+
     return SessionWrapper(session)
 
 
