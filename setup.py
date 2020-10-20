@@ -42,4 +42,5 @@ setup(name='IBATS_Utils',
           'SQLAlchemy>=1.2.8',
           'xlrd>=1.1.0',
           'matplotlib>=3.0.3',
+          'numba>=0.51.2',
       ])

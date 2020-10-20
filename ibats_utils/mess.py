@@ -28,6 +28,7 @@ import subprocess
 import importlib
 import shutil
 import random
+from numba import njit
 
 logger = logging.getLogger(__name__)
 STR_FORMAT_DATE = '%Y-%m-%d'
@@ -498,6 +499,22 @@ def get_first_idx(iterable, func):
     return None
 
 
+@njit
+def get_first_idx_larger_than(arr: np.ndarray, k):
+    for i in range(len(arr)):
+        if arr[i] > k:
+            return i
+    return -1
+
+
+@njit
+def get_first_idx_smaller_than(arr: np.ndarray, k):
+    for i in range(len(arr)):
+        if arr[i] < k:
+            return i
+    return -1
+
+
 def get_last(iterable, comp_func, ret_func=None):
     count = len(iterable)
     for n in range(count - 1, -1, -1):
@@ -519,6 +536,83 @@ def get_last_idx(iterable, func):
         if func(iterable[n]):
             return n
     return None
+
+
+@njit
+def get_last_idx_larger_than(arr: np.ndarray, k):
+    for i in range(len(arr) - 1, -1, -1):
+        if arr[i] > k:
+            return i
+    return -1
+
+
+@njit
+def get_last_idx_smaller_than(arr: np.ndarray, k):
+    for i in range(len(arr) - 1, -1, -1):
+        if arr[i] < k:
+            return i
+    return -1
+
+
+@njit
+def get_nth_index(arr: np.ndarray, func, count):
+    c = 0
+    for i in range(len(arr)):
+        if func(arr[i]):
+            c += 1
+            if c == count:
+                return i
+    return -1
+
+
+@njit
+def get_nth_index_right(arr: np.ndarray, func, count):
+    c = 0
+    for i in range(len(arr) - 1, -1, -1):
+        if func(arr[i]):
+            c += 1
+            if c == count:
+                return i
+    return -1
+
+
+def _test_get_idx_nb():
+    np.random.seed(0)
+    arr = np.random.rand(10 ** 7)
+    m = 0.999999
+    n = 0.9999999
+    # # Start of array benchmark
+    # % timeit next(iter(np.where(arr > m)[0]), -1)  # 43.5 ms
+    # % timeit next((idx for idx, val in enumerate(arr) if val > m), -1)  # 2.5 µs
+    # # End of array benchmark
+    # % timeit next(iter(np.where(arr > n)[0]), -1)  # 21.4 ms
+    # % timeit next((idx for idx, val in enumerate(arr) if val > n), -1)  # 39.2 ms
+    idx = get_first_idx_larger_than(arr, n)
+    assert idx == -1
+    idx = get_first_idx_smaller_than(arr, 1 - n)
+    assert idx == 3600965
+    idx = get_last_idx_larger_than(arr, n)
+    assert idx == -1
+    idx = get_last_idx_smaller_than(arr, 1 - n)
+    assert idx == 3600965
+
+    idx = get_first_idx_larger_than(arr, m)
+    assert idx == 198253
+    idx = get_first_idx_smaller_than(arr, 1 - m)
+    assert idx == 661553
+    idx = get_last_idx_larger_than(arr, m)
+    assert idx == 8361873
+    idx = get_last_idx_smaller_than(arr, 1 - m)
+    assert idx == 6590717
+
+    @njit
+    def func(val):
+        return val > m
+
+    idx = get_nth_index(arr, func, 2)
+    assert idx == 801807
+    idx = get_nth_index_right(arr, func, 2)
+    assert idx == 8142781
 
 
 def replace_none_2_str(string, replace=''):
@@ -1771,6 +1865,7 @@ if __name__ == "__main__":
     #
     # foo(1, 2, 3, 4, e=5, f=6)
 
-    _test_get_module_file_path()
+    # _test_get_module_file_path()
     # _test_copy_module_file_to()
     # _test_copy_folder_to()
+    _test_get_idx_nb()
