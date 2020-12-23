@@ -43,6 +43,17 @@ PATTERN_DATETIME_FORMAT_RESTRICT = re.compile(r"\d{4}(\D)*\d{2}(\D)*\d{2} \d{2}(
 PATTERN_DATETIME_FORMAT = re.compile(r"\d{4}(\D)*\d{1,2}(\D)*\d{1,2} \d{1,2}(\D)*\d{1,2}(\D)*\d{1,2}")
 
 
+def thread_save(func):
+    """线程安全装饰器，用于该函数执行过程线程安全"""
+    lock = threading.Lock()
+
+    def wrapper(*args, **kwargs):
+        with lock:
+            func(*args, **kwargs)
+
+    return wrapper
+
+
 def active_coroutine(func):
     """装饰器：向前执行第一个 yield 表达式，预激活 func"""
     @functools.wraps(func)
